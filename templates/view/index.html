@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/static/admin/css/admin.dark.css" />
     <link rel="stylesheet" href="/static/admin/css/variables.css" />
     <link rel="stylesheet" href="/static/admin/css/reset.css" />
-    <!-- 依 赖 脚 本 -->
+]    <!-- 依 赖 脚 本 -->
     <script src="/static/component/layui/layui.js"></script>
     <script src="/static/component/pear/pear.js"></script>
     <script src="/static/js/pear_admin_flask.js"></script>
@@ -115,12 +115,19 @@
 
     <!-- 框 架 初 始 化 -->
     <script>
+      /// admin模块是Layui为后台系统提供的组件，
+      /// jquery是一个广泛使用的JavaScript库，用于简化DOM操作等，
+      /// popup则是用于显示弹出提示的模块。
       layui.use(["admin", "jquery", "popup"], function () {
         var $ = layui.jquery;
         var admin = layui.admin;
         var popup = layui.popup;
 
         // 给 pear-admin-layui 的默认 ajax 请求添加权限
+        /**
+        使用$.ajaxSetup方法设置了全局的AJAX请求默认值，这里主要是给所有请求的头部添加了Authorization字段，
+        用于携带访问令牌（access token），这个令牌通常是用户登录后得到的，保存在本地存储localStorage中。
+        **/
         $.ajaxSetup({
           headers: {
             Authorization: "Bearer " + localStorage.getItem("access_token"),
@@ -128,10 +135,23 @@
         });
 
         // 请求后端，验证是否已经登录
+        /**
+        通过AJAX请求后端的/api/v1/user/profile接口，目的是验证用户是否已经登录。
+        如果返回的数据中的code字段不是0（通常0代表操作成功），
+        则说明用户未登录或登录状态已失效，
+        页面将重定向到登录页面/view/login.html。
+        **/
         $.ajax({
           type: "GET",
           url: "/api/v1/user/profile",
           success: function (data) {
+            /**
+            {
+                "code": 0,
+                "msg": "获取个人数据成功",
+                "data": current_user.json(),
+            }
+            **/
             if (data.code !== 0) {
               location.href = "/view/login.html";
             }
@@ -141,10 +161,17 @@
           },
         });
 
+        /// 设置Layui后台系统的配置文件路径为/static/config/pear.config.json
         admin.setConfigurationPath("/static/config/pear.config.json");
-
+        /// 调用admin.render()方法渲染后台系统的界面。
         admin.render();
 
+        /**
+        设置用户登出admin.logout的逻辑，当用户点击登出按钮时，
+        会发送AJAX请求到后端的/api/v1/logout接口，
+        并清除本地存储中的access_token和refresh_token。
+        登出成功后，会有一个成功的弹出提示，并且1秒后页面将跳转到登录页面。
+        **/
         admin.logout(function () {
           $.ajax({
             type: "GET",

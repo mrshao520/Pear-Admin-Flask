@@ -23,3 +23,14 @@ id,name,code,type,url,icon_sign,status,sort,open_type,pid
 124,工作空间,,menu,,layui-icon layui-icon-console,,1,,0
 125,工作台,,path,/view/console/index.html,layui-icon layui-icon-console,,2,_component,124
 126,首页,,path,/view/analysis/index.html,layui-icon layui-icon-console,,1,_component,124
+127,功能管理,ums:function,menu,,layui-icon layui-icon-table,,3,,0
+128,数据管理,ums:data:list,path,/system/data/index.html,,,1,,127
+129,新增数据,ums:data:create,auth,,,,0,,128
+130,修改数据,ums:data:update,auth,,,,0,,128
+131,删除数据,ums:data:delete,auth,,,,0,,128
+132,查询数据,ums:data:read,auth,,,,0,,128
+133,任务管理,ums:task:list,path,/system/task/index.html,,,2,,127
+134,新增任务,ums:task:create,auth,,,,0,,133
+135,修改任务,ums:task:update,auth,,,,0,,133
+136,查询任务,ums:task:read,auth,,,,0,,133
+137,删除任务,ums:task:delete,auth,,,,0,,133

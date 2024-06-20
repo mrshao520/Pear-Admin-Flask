@@ -35,7 +35,7 @@
                   <span>Pear Admin Flask</span>
                 </div>
                 <div class="top-desc">
-                  以 超 乎 想 象 的 速 度 构 建 内 部 工 具
+                  大 城 市 多 源 数 据 实 时 采 集 处 理 系 统
                 </div>
                 <div style="margin-top: 30px">
                   <div class="layui-form-item">
@@ -48,7 +48,7 @@
                         placeholder="账户"
                         autocomplete="off"
                         name="username"
-                        value="正心全栈编程"
+                        value="admin"
                         class="layui-input"
                       />
                     </div>
@@ -120,23 +120,42 @@
           /// 动画
           let btn = button.load({ elem: ".login" });
 
-          /// 登录
+          /// console.log(data);
+          /**
+          Object.field:
+            password: "123456"
+            username: "username"
+          **/
+
+          /// 登录 使用 JQeuery 发起 AJAX 请求
           $.ajax({
-            url: "/api/v1/login",
-            type: "POST",
-            data: JSON.stringify(data.field),
-            contentType: "application/json",
+            url: "/api/v1/login", /// 请求的URL
+            type: "POST", /// 请求类型
+            data: JSON.stringify(data.field), /// 包含用户输入的登录信息
+            contentType: "application/json", /// 数据格式
+            /// 请求成功
             success: function (res) {
+              /// 将服务器返回的access_token存储在本地存储中，用于后续请求验证。
               localStorage.setItem("access_token", res.access_token);
+              /// 将refresh_token也存储在本地存储中，
+              /// 通常用于在access_token过期时获取新的access_token。
               localStorage.setItem("refresh_token", res.refresh_token);
+              /// 停止某个按钮的动画，可能是为了防止用户重复点击。
               btn.stop(function () {
                 popup.success("登录成功", function () {
+                  /// 重定向到当前网站的根目录路径
                   location.href = "/";
                 });
               });
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
               btn.stop(function () {
+                /// console.log(XMLHttpRequest)
+                /// XMLHttpRequest.responseJSON:
+                ///     code: -1
+                ///     msg: "用户不存在"
+                /// console.log(textStatus) error
+                /// console.log(errorThrown) UNAUTHORIZED
                 popup.failure(XMLHttpRequest.responseJSON.msg);
               });
             },

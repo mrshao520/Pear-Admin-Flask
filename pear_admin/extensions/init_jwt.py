@@ -5,7 +5,6 @@ from pear_admin.orms.user import UserORM
 
 jwt = JWTManager()
 
-
 @jwt.user_identity_loader
 def user_identity_lookup(user):
     return user.id

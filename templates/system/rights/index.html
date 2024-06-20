@@ -23,13 +23,19 @@
         </div>
       </div>
     </div>
+
+
     <script type="text/html" id="rights-toolbar">
       <div class="layui-btn-container">
+        <!-- class="layui-btn layui-btn-sm" 按钮样式 -->
+        <!-- lay-event="rights-toolbar-add" 自定义属性，用于指定按钮的事件名称 -->
         <button class="layui-btn layui-btn-sm" lay-event="rights-toolbar-add">
           新增权限
         </button>
       </div>
     </script>
+
+    
     <script type="text/html" id="rights-tool">
       <div class="layui-btn-container">
         <button
@@ -205,10 +211,10 @@
     </form>
     <script>
       layui.use(function () {
-        var treeTable = layui.treeTable;
-        var $ = layui.$;
-        var form = layui.form;
-        var layer = layui.layer;
+        var treeTable = layui.treeTable; // 用于渲染树形表格的模块
+        var $ = layui.$;   // JQuery别名
+        var form = layui.form; // 用于处理表单的模块
+        var layer = layui.layer; // 用于弹出层的模块
 
         treeTable.render({
           elem: "#rights-table",
@@ -276,17 +282,24 @@
           ],
           page: true,
         });
-
+        
+        // 监听 rights-toolbar-add 的树形表格的工具栏上发生的事件
         treeTable.on("toolbar(rights-table)", function (obj) {
+          // 检查发生的事件是否是 rights-toolbar-add
           if (obj.event === "rights-toolbar-add") {
+            // 使用 JQuery 选择器找到 id 为 rights-form 的表单元素
+            // 并调用 reset 方法，将表单重置到初始状态，清除所有的输入内容
             $("#rights-form")[0].reset();
+            // 
             layer.open({
-              type: 1,
-              shade: false,
-              content: $("#rights-form"),
+              type: 1, // 页面层
+              shade: false, // 弹层的遮罩
+              content: $("#rights-form"), // 表示弹窗的内容是 rights-form 的表单元素
               area: ["50%", "80%"],
             });
-            form.render($("#rights-form"));
+            // 重新渲染 id 为 rights-form 的表单元素
+            // 确保 Layui 的表单样式和功能正确应用到表单上
+            form.render($("#rights-form")); 
           }
         });
 
@@ -338,6 +351,8 @@
         treeTable.on("tool(rights-table)", function (obj) {
           var layEvent = obj.event;
           if (layEvent === "rights-tool-edit") {
+            // console.log(obj.data)
+            // 将点击行的数据填充到表单中，以便在弹出的层中编辑
             form.val("rights-form", obj.data);
             layer.open({
               type: 1,
@@ -348,13 +363,15 @@
           } else if (layEvent === "rights-tool-del") {
             $.ajax({
               url: `/api/v1/rights/${obj.data.id}`,
-              type: "DELETE",
+              type: "DELETE", // 发送 delete 请求
               contentType: "application/json",
               headers: {
+                // 设置 X-CSRF-TOKEN 防止跨站请求伪造攻击
                 "X-CSRF-TOKEN": getCookie("csrf_access_token"),
               },
               success: function (res) {
                 if (!res.code) {
+                  // 重新加载属性表格 rights-table 的数据
                   treeTable.reloadData("rights-table");
                 }
               },

@@ -10,9 +10,10 @@ rights_api = Blueprint("rights", __name__)
 
 
 @rights_api.get("/rights")
-@jwt_required()
+@jwt_required() # 使用 JWT 进行用户认证
 def rights_list():
     t = request.args.get("type", default="")
+    # print(t)
     if t == "tree":  # tree 组件数据，用于权限赋值
         # 1. 获取所有的权限
         rights_all = db.session.execute(db.select(RightsORM)).scalars()
@@ -20,6 +21,7 @@ def rights_list():
             {"id": r.id, "pid": r.pid, "title": r.name, "sort": r.sort}
             for r in rights_all
         ]
+        # print(f'{rights_list}')
         # 2. 获取已有权限 id 集合
         # 3. 列表转属性组件
         rights_list.sort(key=lambda item: (item["pid"], item["id"]), reverse=True)
@@ -40,10 +42,13 @@ def rights_list():
 
         return {"code": 0, "data": tree_dict.get(0)}
     if t == "treetable":  # tree table 数据
+        # 页数
         page = request.args.get("page", type=int, default=1)
+        # 每页的数量
         per_page = request.args.get("per_page", type=int, default=10)
-
+        # 查询 type==menu 的权限
         q = db.select(RightsORM).where(RightsORM.type == "menu")
+        # 对查询结果进行分页处理
         pages = db.paginate(q, page=page, per_page=per_page, error_out=False)
 
         ret = []
@@ -68,7 +73,7 @@ def rights_list():
 
 
 @rights_api.post("/rights")
-@jwt_required()
+@jwt_required() 
 def create_rights():
     data = request.get_json()
     if not data["pid"]:

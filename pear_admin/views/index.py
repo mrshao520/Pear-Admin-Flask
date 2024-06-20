@@ -5,6 +5,7 @@ index_bp = Blueprint("index", __name__)
 
 @index_bp.route("/")
 def index():
+    # 查找并渲染名为 view/index.html 的模板文件
     return render_template("view/index.html")
 
 

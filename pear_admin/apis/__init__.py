@@ -1,5 +1,6 @@
 from flask import Blueprint, Flask
 
+from .function import function_api
 from .department import department_api
 from .passport import passport_api
 from .rights import rights_api
@@ -15,5 +16,6 @@ def register_apis(app: Flask):
     apis.register_blueprint(role_api)
     apis.register_blueprint(department_api)
     apis.register_blueprint(user_api)
+    apis.register_blueprint(function_api)
 
     app.register_blueprint(apis)

@@ -4,6 +4,8 @@ from .department import DepartmentORM
 from .rights import RightsORM
 from .role import RoleORM
 from .user import UserORM
+from .data import DataPondingORM, DataSummaryORM
+from .task import TaskORM
 
 user_role = db.Table(
     "ums_user_role",  # 用户-角色中间表名称

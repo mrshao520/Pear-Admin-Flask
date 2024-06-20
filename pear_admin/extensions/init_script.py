@@ -4,13 +4,17 @@ import os
 from flask import Flask, current_app
 
 from pear_admin.extensions import db
-from pear_admin.orms import DepartmentORM, RightsORM, RoleORM, UserORM
+from pear_admin.orms import DepartmentORM, RightsORM, RoleORM, UserORM, DataPondingORM
+
+from datetime import datetime
 
 
 def dict_to_orm(d, o):
     for k, v in d.items():
         if k == "password":
             o.password = v
+        if k == "date":
+            o.date = datetime.strptime(v, "%Y-%m-%d %H:%M:%S")
         else:
             setattr(o, k, v or None)
 
@@ -26,9 +30,13 @@ def csv_to_databases(path, orm):
 
 
 def register_script(app: Flask):
-    @app.cli.command()
+    # 用于注册一个命令到Flask应用程序的命令行界面（CLI）
+    # 这个命令是 init，用于初始化数据库
+    @app.cli.command()  # 装饰器，将 init 函数注册为 Flask CLI 命令
     def init():
+        # 删除所有数据库
         db.drop_all()
+        # 创建数据库
         db.create_all()
 
         root = current_app.config.get("ROOT_PATH")
@@ -62,3 +70,6 @@ def register_script(app: Flask):
                 id_list = [int(_id) for _id in d["role_ids"].split(":")]
                 user.role_list = RoleORM.query.filter(RoleORM.id.in_(id_list)).all()
                 db.session.commit()
+
+        ponding_data_path = os.path.join(root, "static", "data", "ums_data_ponding.csv")
+        csv_to_databases(ponding_data_path, DataPondingORM)
