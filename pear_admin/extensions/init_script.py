@@ -16,7 +16,11 @@ def dict_to_orm(d, o):
         if k == "date":
             o.date = datetime.strptime(v, "%Y-%m-%d %H:%M:%S")
         else:
-            setattr(o, k, v or None)
+            try:
+                setattr(o, k, v or None)
+            except:
+                print(f'{k}-{v}-{d}')
+                exit
 
 
 def csv_to_databases(path, orm):

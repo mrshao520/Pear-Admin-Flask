@@ -92,9 +92,15 @@
         </div>
       </div>
       <div class="layui-form-item">
-        <label class="layui-form-label">经纬度</label>
+        <label class="layui-form-label">经度</label>
         <div class="layui-input-block">
-          <input type="text" name="lati_longi_tude" placeholder="请输入经纬度" lay-verify="required" autocomplete="off" class="layui-input" />
+          <input type="text" name="longitude" placeholder="请输入经度" lay-verify="required" autocomplete="off" class="layui-input" />
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">纬度</label>
+        <div class="layui-input-block">
+          <input type="text" name="latitude" placeholder="请输入纬度" lay-verify="required" autocomplete="off" class="layui-input" />
         </div>
       </div>
       <div class="layui-form-item">
@@ -196,7 +202,8 @@
                 { field: 'time', title: '时间', minWidth: 80, expandedWidth: 80 },
                 { field: 'city', title: '城市', minWidth: 80, expandedWidth: 80, sort: true },
                 { field: 'position', title: '地点', minWidth: 200, expandedWidth: 200, sort: true },
-                { field: 'lati_longi_tude', title: '经纬度', minWidth: 200, expandedWidth: 200, sort: true },
+                { field: 'longitude', title: '经度', minWidth: 140, expandedWidth: 140, sort: true },
+                { field: 'latitude', title: '纬度', minWidth: 140, expandedWidth: 140, sort: true },
                 { field: 'depth_value', title: '深度值', minWidth: 100, expandedWidth: 100 },
                 { field: 'description', title: '备注', minWidth: 180, expandedWidth: 180 },
                 {
@@ -450,6 +457,9 @@
                 table.reloadData('ponding-table')
                 popup.success(res.msg)
               }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              popup.failure(XMLHttpRequest.responseJSON.msg)
             }
           })
           return false;

@@ -16,7 +16,7 @@ class BaseConfig:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
     
     # 设置时区，时区不一致会导致定时任务的时间错误
-    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
+    # SCHEDULER_TIMEZONE = 'Asia/Shanghai'
     # 一定要开启API功能，这样才可以用api的方式去查看和修改定时任务
     SCHEDULER_API_ENABLED = True
     # api前缀（默认是/scheduler）
@@ -24,7 +24,7 @@ class BaseConfig:
     # 配置允许执行定时任务的主机名
     SCHEDULER_ALLOWED_HOSTS = ['*']
     # auth验证。默认是关闭的，
-    SCHEDULER_AUTH = HTTPBasicAuth()
+    # SCHEDULER_AUTH = HTTPBasicAuth()
     # 设置定时任务的执行器（默认是最大执行数量为30的线程池）
     SCHEDULER_EXECUTORS = {'default': {'type': 'threadpool', 'max_workers': 30}}
 
@@ -35,7 +35,7 @@ class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = "sqlite:///pear_admin.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # 存储定时任务
-    SCHEDULER_JOBSTORES = {'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI)}
+    SCHEDULER_JOBSTORES = {'default': SQLAlchemyJobStore(url="sqlite:///instance/pear_admin.db", tablename='ums_task_scheduler')}
 
 
 class TestingConfig(BaseConfig):

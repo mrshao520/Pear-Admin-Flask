@@ -93,8 +93,11 @@ def create_ponding():
     date = datetime.strptime(data.get("date"), "%Y-%m-%d %H:%M:%S")
     data["date"] = date
     ponding = DataPondingORM(**data)
-    ponding.save()
-    return {"code": 0, "msg": "新增积水点信息成功"}
+    result = ponding.save()
+    if result:
+        return {"code": 0, "msg": "新增积水点信息成功"}
+    else:
+        return {"code": -1, "msg": "重复数据，插入失败"}, 401
 
 
 @ponding_api.put("/ponding/<int:uid>")
@@ -112,8 +115,11 @@ def change_ponding(uid):
         if key == "date":
             value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
         setattr(ponding_obj, key, value)
-    ponding_obj.save()
-    return {"code": 0, "msg": "修改积水点信息成功"}
+    result = ponding_obj.save()
+    if result:
+        return {"code": 0, "msg": "修改积水点信息成功"}
+    else:
+        return {"code": -1, "msg": "修改积水点信息失败，数据重复"}, 401
 
 
 @ponding_api.delete("/ponding/<int:rid>")

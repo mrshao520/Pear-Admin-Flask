@@ -4,6 +4,7 @@ from .init_db import db, migrate
 from .init_jwt import jwt
 from .init_script import register_script
 from .init_error_views import init_error_views
+from .init_scheduler import scheduler
 
 
 def register_extensions(app: Flask):
@@ -13,3 +14,6 @@ def register_extensions(app: Flask):
     init_error_views(app)
 
     register_script(app)
+    # 初始化 scheduler
+    scheduler.init_app(app)
+    scheduler.start()
