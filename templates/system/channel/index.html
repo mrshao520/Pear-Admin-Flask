@@ -62,13 +62,13 @@
       <div class="layui-form-item">
         <label class="layui-form-label">命令</label>
         <div class="layui-input-block">
-          <input type="text" name="command" placeholder="请输入输入命令，city表示城市，start_datetime表示开始时间，end_datetime表示结束时间" lay-verify="required" autocomplete="off" class="layui-input" />
+          <input type="text" name="command" placeholder="请输入输入命令，city表示城市，start_datetime表示开始时间，end_datetime表示结束时间" lay-verify="required|word_num" autocomplete="off" class="layui-input" />
         </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">错误信息</label>
         <div class="layui-input-block">
-          <textarea placeholder="错误信息和异常" name="information" lay-verify="word_num" class="layui-textarea"></textarea>
+          <textarea placeholder="错误信息和异常" name="information" class="layui-textarea"></textarea>
         </div>
       </div>
       <div class="layui-form-item">
@@ -153,7 +153,7 @@
                   expandedWidth: 60,
                   sort: true,
                   templet: function (d) {
-                    if (d) {
+                    if (d.status) {
                       return '<button type="button" class="layui-btn layui-btn-sm layui-btn-radius">正常</button>'
                     } else {
                       return '<button type="button" class="layui-btn layui-btn-sm layui-btn-danger layui-btn-radius">异常</button>'
@@ -303,6 +303,40 @@
             })
           }
         })
+
+        // 表单 自定义验证规则
+        form.verify({
+          otherReq: function (value, item) {
+            var $ = layui.$
+            var verifyName = $(item).attr('name'),
+              verifyType = $(item).attr('type'),
+              formElem = $(item).parents('.layui-form'), //获取当前所在的form元素，如果存在的话
+              verifyElem = formElem.find('input[name=' + verifyName + ']'), //获取需要校验的元素
+              isTrue = verifyElem.is(':checked'), //是否命中校验
+              focusElem = verifyElem.next().find('i.layui-icon') //焦点元素
+            if (!isTrue || !value) {
+              //定位焦点
+              focusElem.css(verifyType == 'radio' ? { color: '#FF5722' } : { 'border-color': '#FF5722' })
+              //对非输入框设置焦点
+              focusElem
+                .first()
+                .attr('tabIndex', '1')
+                .css('outline', '0')
+                .blur(function () {
+                  focusElem.css(verifyType == 'radio' ? { color: '' } : { 'border-color': '' })
+                })
+                .focus()
+              return '必填项不能为空'
+            }
+          },
+          word_num: function(value, item){
+            var varify_name = $(item).attr('name')
+            if (value.length > 60){
+              popup.failure(varify_name + " 的输入字数请限制在 60 以内!")
+              return '输入字数请限制在 60 以内!'
+            }
+          }
+        })
       
         // 表单提交按钮触发
         form.on('submit(channel-form-add)', function (data) {
@@ -334,6 +368,9 @@
                 table.reloadData('channel-table')
                 popup.success(res.msg)
               }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              popup.failure(XMLHttpRequest.responseJSON.msg)
             }
           })
           return false
@@ -369,6 +406,9 @@
                 table.reloadData('channel-table')
                 popup.success(res.msg)
               }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+              popup.failure(XMLHttpRequest.responseJSON.msg)
             }
           })
           return false

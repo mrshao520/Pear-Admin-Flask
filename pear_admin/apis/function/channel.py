@@ -39,7 +39,10 @@ def create_channel():
     # 保存任务
     channel = ChannelsORM(**data)
     # save之后才能产生主键id
-    channel.save()
+    try:
+        channel.save()
+    except Exception as e:
+        return {"code": -1, "msg": "{e}"}, 401
 
     return {"code": 0, "msg": "新增检索成功"}
 
@@ -58,7 +61,10 @@ def change_channel(uid):
     for key, value in data.items():
         setattr(channel_obj, key, value)
 
-    channel_obj.save()
+    try:
+        channel_obj.save()
+    except Exception as e:
+        return {"code": -1, "msg": "{e}"}, 401
     return {"code": 0, "msg": "修改检索成功"}
 
 

@@ -4,7 +4,14 @@ import os
 from flask import Flask, current_app
 
 from pear_admin.extensions import db
-from pear_admin.orms import DepartmentORM, RightsORM, RoleORM, UserORM, DataPondingORM, ChannelsORM
+from pear_admin.orms import (
+    DepartmentORM,
+    RightsORM,
+    RoleORM,
+    UserORM,
+    DataPondingORM,
+    ChannelsORM,
+)
 from datetime import datetime
 from configs import DevelopmentConfig
 
@@ -19,7 +26,7 @@ def dict_to_orm(d, o):
             try:
                 setattr(o, k, v or None)
             except:
-                print(f'{k}-{v}-{d}')
+                print(f"{k}-{v}-{d}")
                 exit
 
 
@@ -42,9 +49,6 @@ def register_script(app: Flask):
         db.drop_all()
         # 创建数据库
         db.create_all()
-        
-        DevelopmentConfig.SCHEDULER_JOBSTORES.get('default').remove_all_jobs()
-        
 
         root = current_app.config.get("ROOT_PATH")
 
@@ -80,6 +84,13 @@ def register_script(app: Flask):
 
         ponding_data_path = os.path.join(root, "static", "data", "ums_data_ponding.csv")
         csv_to_databases(ponding_data_path, DataPondingORM)
-        
-        channels_data_path = os.path.join(root, "static", "data", "ums_task_channels.csv")
+
+        channels_data_path = os.path.join(
+            root, "static", "data", "ums_task_channels.csv"
+        )
         csv_to_databases(channels_data_path, ChannelsORM)
+
+        try:
+            DevelopmentConfig.SCHEDULER_JOBSTORES.get("default").remove_all_jobs()
+        except Exception as e:
+            print(f"{e}")

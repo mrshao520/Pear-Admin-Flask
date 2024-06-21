@@ -34,8 +34,9 @@ def task_function(
         end_datetime.strftime("%Y-%m-%d %H:%M:%S"),
     ]
     command_list = [
-        new_words[replace_words.index(word)] if word in replace_words else word
+        (new_words[replace_words.index(word)] if word in replace_words else word)
         for word in command
+        if word != ""
     ]
 
     print(f"command list : {command_list}")
@@ -46,7 +47,10 @@ def task_function(
 
     try:
         p = subprocess.Popen(
-            args=command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            args=command_list[1:],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=command_list[0],
         )
         # 获取实时输出
         for line in iter(p.stdout.readline, b""):

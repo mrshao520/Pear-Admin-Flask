@@ -54,25 +54,28 @@ def create_task():
     # 保存任务
     task = TaskORM(**data)
     # save之后才能产生主键id
-    task.save()
-    # 增加定时任务
-    scheduler.add_job(
-        func=task_function,
-        trigger="interval",
-        id=str(task.id),
-        kwargs={
-            "channels": data["channels"],
-            "city": data["cities"],
-            "start_datetime": data["start_datetime"],
-            "end_datetime": data["end_datetime"],
-        },
-        hours=data["interval"].hour,
-        minutes=data["interval"].minute,
-        seconds=data["interval"].second,
-        start_date=data["start_datetime"],
-        end_date=data["end_datetime"],
-        # replace_existing=True,
-    )
+    try:
+        task.save()
+        # 增加定时任务
+        scheduler.add_job(
+            func=task_function,
+            trigger="interval",
+            id=str(task.id),
+            kwargs={
+                "channels": data["channels"],
+                "city": data["cities"],
+                "start_datetime": data["start_datetime"],
+                "end_datetime": data["end_datetime"],
+            },
+            hours=data["interval"].hour,
+            minutes=data["interval"].minute,
+            seconds=data["interval"].second,
+            start_date=data["start_datetime"],
+            end_date=data["end_datetime"],
+            # replace_existing=True,
+        )
+    except Exception as e:
+        return {"code": -1, "msg": f"{e}"}, 401
 
     return {"code": 0, "msg": "新增任务成功"}
 

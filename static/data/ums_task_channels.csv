@@ -1,7 +1,7 @@
 channel,command,effective_number,number,total_effective_number,total_number,recording_time,status,information
-抖音,cat city start_datetime end_datetime,0,0,0,0,,,
-搜狐,cat test.txt,0,0,0,0,,,
-微博,cat city start_datetime end_datetime,0,0,0,0,,,
-腾讯,cat city start_datetime end_datetime,0,0,0,0,,,
-百度,cat city start_datetime end_datetime,0,0,0,0,,,
-头条,cat city start_datetime end_datetime,0,0,0,0,,,
+抖音,/ douyin city start_datetime end_datetime,0,0,0,0,,,
+搜狐,/ souhu city start_datetime end_datetime,0,0,0,0,,,
+微博,/ weibo city start_datetime end_datetime,0,0,0,0,,,
+腾讯,/ tengxun city start_datetime end_datetime,0,0,0,0,,,
+百度,/ baidu city start_datetime end_datetime,0,0,0,0,,,
+头条,/ toutiao city start_datetime end_datetime,0,0,0,0,,,
