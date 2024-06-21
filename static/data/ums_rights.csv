@@ -34,3 +34,8 @@ id,name,code,type,url,icon_sign,status,sort,open_type,pid
 135,修改任务,ums:task:update,auth,,,,0,,133
 136,查询任务,ums:task:read,auth,,,,0,,133
 137,删除任务,ums:task:delete,auth,,,,0,,133
+138,检索管理,ums:channel:list,path,/system/channel/index.html,,,3,,127
+139,增加检索,ums:channel:create,auth,,,,0,,138
+140,修改检索,ums:channel:update,auth,,,,0,,138
+141,删除检索,ums:channel:delete,auth,,,,0,,138
+142,查询检索,ums:channel:read,auth,,,,0,,138

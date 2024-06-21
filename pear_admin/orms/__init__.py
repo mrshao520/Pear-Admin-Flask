@@ -4,7 +4,7 @@ from .department import DepartmentORM
 from .rights import RightsORM
 from .role import RoleORM
 from .user import UserORM
-from .data import DataPondingORM, DataSummaryORM
+from .data import DataPondingORM, DataSummaryORM, ChannelsORM
 from .task import TaskORM
 
 user_role = db.Table(

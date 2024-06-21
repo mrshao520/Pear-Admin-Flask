@@ -5,8 +5,6 @@ from pear_admin.orms import TaskORM
 from datetime import datetime
 from .task_function import task_function
 
-import subprocess
-
 task_api = Blueprint("task", __name__)
 
 
@@ -46,13 +44,13 @@ def create_task():
     )
     data["interval"] = datetime.strptime(data.get("interval"), "%H:%M:%S")
     # 将城市拼接在一起
-    cites = []
-    for k, v in data.items():
-        if v == "on":
-            cites.append(k)
-    for i in cites:
-        del data[i]
-    data["cities"] = ":".join(cites)
+    # cites = []
+    # for k, v in data.items():
+    #     if v == "on":
+    #         cites.append(k)
+    # for i in cites:
+    #     del data[i]
+    # data["cities"] = ":".join(cites)
     # 保存任务
     task = TaskORM(**data)
     # save之后才能产生主键id
@@ -148,3 +146,4 @@ def del_task(rid):
     task_obj.delete()
 
     return {"code": 0, "msg": f"删除行 [id:{rid}] 成功"}
+

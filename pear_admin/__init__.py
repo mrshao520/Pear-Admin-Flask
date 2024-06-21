@@ -18,18 +18,20 @@ def create_app(config_name="dev"):
     register_apis(app)
     # 注册视图函数，定义如何处理HTTP请求
     register_views(app)
+    
+    global_app = app
 
-    # @app.errorhandler(403)
-    # def handle_404(e):
-    #     return render_template("error/403.html")
-    #
-    # @app.errorhandler(404)
-    # def handle_403(e):
-    #     return render_template("error/404.html")
-    #
-    # @app.errorhandler(500)
-    # def handle_500(e):
-    #     return render_template("error/500.html")
+    @app.errorhandler(403)
+    def handle_404(e):
+        return render_template("error/403.html")
+    
+    @app.errorhandler(404)
+    def handle_403(e):
+        return render_template("error/404.html")
+    
+    @app.errorhandler(500)
+    def handle_500(e):
+        return render_template("error/500.html")
     
     # 返回配置好的Flask应用实例
     return app

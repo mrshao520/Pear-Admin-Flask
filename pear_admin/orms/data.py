@@ -1,6 +1,7 @@
 from pear_admin.extensions import db
 from sqlalchemy import select
 from ._base import BaseORM
+from datetime import datetime
 
 
 class DataPondingORM(BaseORM):
@@ -78,4 +79,41 @@ class DataSummaryORM(BaseORM):
             "city": self.city,
             "description": self.description,
             "volume": self.volume,
+        }
+
+
+class ChannelsORM(BaseORM):
+    __tablename__ = "ums_task_channels"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment="自增id")
+    channel = db.Column(db.String(64), unique=True, nullable=False, comment="检索渠道")
+    command = db.Column(db.String(256), nullable=False, comment="命令")
+    effective_number = db.Column(
+        db.Integer, nullable=False, comment="今日有效总数", default=0
+    )
+    number = db.Column(db.Integer, nullable=False, comment="今日有效总数", default=0)
+    total_effective_number = db.Column(
+        db.Integer, nullable=False, comment="有效总数", default=0
+    )
+    total_number = db.Column(db.Integer, nullable=False, comment="检索总数", default=0)
+    recording_time = db.Column(
+        db.DateTime, nullable=False, comment="最近记录时间", default=datetime.now
+    )
+    status = db.Column(
+        db.Boolean, nullable=False, comment="状态(1良好,0异常)", default=True
+    )
+    information = db.Column(db.Text, nullable=True, comment="错误信息或异常")
+
+    def json(self):
+        return {
+            "id": self.id,
+            "channel": self.channel,
+            "command": self.command,
+            "effective_number": self.effective_number,
+            "number": self.number,
+            "total_effective_number": self.total_effective_number,
+            "total_number": self.total_number,
+            "recording_time": self.recording_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": self.status,
+            "information": self.information,
         }
