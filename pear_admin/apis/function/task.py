@@ -32,15 +32,26 @@ def create_task():
     id = data["id"]
     if data["id"]:
         del data["id"]
+    print(data)
     # print(data)
     # {'id': None, 'date': '2024-06-18 14:49:56', 'time': '11', 'city': '11',
     # 'position': '11', 'lati_longi_tude': '11', 'depth_value': '1', 'description': '1'}
     # 转换时间格式
-    data["start_datetime"] = datetime.strptime(
-        data.get("start_datetime"), "%Y-%m-%d %H:%M:%S"
+    data["start_datetime"] = (
+        datetime.strptime(data.get("start_datetime"), "%Y-%m-%d %H:%M:%S")
+        if data["start_datetime"] != ""
+        else None
     )
-    data["end_datetime"] = datetime.strptime(
-        data.get("end_datetime"), "%Y-%m-%d %H:%M:%S"
+    data["end_datetime"] = (
+        datetime.strptime(data.get("end_datetime"), "%Y-%m-%d %H:%M:%S")
+        if data["end_datetime"] != ""
+        else None
+    )
+    data["task_start_datetime"] = datetime.strptime(
+        data.get("task_start_datetime"), "%Y-%m-%d %H:%M:%S"
+    )
+    data["task_end_datetime"] = datetime.strptime(
+        data.get("task_end_datetime"), "%Y-%m-%d %H:%M:%S"
     )
     data["interval"] = datetime.strptime(data.get("interval"), "%H:%M:%S")
     # 将城市拼接在一起
@@ -70,8 +81,8 @@ def create_task():
             hours=data["interval"].hour,
             minutes=data["interval"].minute,
             seconds=data["interval"].second,
-            start_date=data["start_datetime"],
-            end_date=data["end_datetime"],
+            start_date=data["task_start_datetime"],
+            end_date=data["task_end_datetime"],
             # replace_existing=True,
         )
     except Exception as e:
@@ -90,19 +101,28 @@ def change_task(uid):
     data = request.get_json()
     del data["id"]
 
-    cites = []
-    for k, v in data.items():
-        if v == "on":
-            cites.append(k)
-    for i in cites:
-        del data[i]
-    data["cities"] = ":".join(cites)
-
+    # cites = []
+    # for k, v in data.items():
+    #     if v == "on":
+    #         cites.append(k)
+    # for i in cites:
+    #     del data[i]
+    # data["cities"] = ":".join(cites)
+    # print(data)
     task_obj = TaskORM.query.get(uid)
     for key, value in data.items():
-        if key == "start_datetime" or key == "end_datetime":
-            value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-            data[key] = value
+        if (
+            key == "start_datetime"
+            or key == "end_datetime"
+            or key == "task_start_datetime"
+            or key == "task_end_datetime"
+        ):
+            if value != "":
+                value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+                data[key] = value
+            else:
+                value = None
+                data[key] = None
         elif key == "interval":
             value = datetime.strptime(value, "%H:%M:%S")
             data[key] = value
@@ -125,8 +145,8 @@ def change_task(uid):
             hours=data["interval"].hour,
             minutes=data["interval"].minute,
             seconds=data["interval"].second,
-            start_date=data["start_datetime"],
-            end_date=data["end_datetime"],
+            start_date=data["task_start_datetime"],
+            end_date=data["task_end_datetime"],
             # replace_existing=True,
         )
 
@@ -149,4 +169,3 @@ def del_task(rid):
     task_obj.delete()
 
     return {"code": 0, "msg": f"删除行 [id:{rid}] 成功"}
-

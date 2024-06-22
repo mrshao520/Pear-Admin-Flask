@@ -87,11 +87,17 @@ def create_ponding():
     data = request.get_json()
     if data["id"]:
         del data["id"]
+    print(data)
     # print(data)
     # {'id': None, 'date': '2024-06-18 14:49:56', 'time': '11', 'city': '11',
     # 'position': '11', 'lati_longi_tude': '11', 'depth_value': '1', 'description': '1'}
     date = datetime.strptime(data.get("date"), "%Y-%m-%d %H:%M:%S")
     data["date"] = date
+    format_time = data.get("format_time")
+    if format_time:
+        data["format_time"] = datetime.strptime(data.get("format_time"), "%Y-%m-%d")
+    else:
+        data["format_time"] = None
     ponding = DataPondingORM(**data)
     result = ponding.save()
     if result:
@@ -109,19 +115,20 @@ def change_ponding(uid):
     """
     data = request.get_json()
     del data["id"]
+    
+    # print(data)
 
     ponding_obj = DataPondingORM.query.get(uid)
     for key, value in data.items():
         if key == "date":
             value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        elif key == "format_time" and value:
+            value = datetime.strptime(value, "%Y-%m-%d")
         setattr(ponding_obj, key, value)
-    result = ponding_obj.save()
-    if result:
-        return {"code": 0, "msg": "修改积水点信息成功"}
-    else:
-        return {"code": -1, "msg": "修改积水点信息失败，数据重复"}, 401
-
-
+    result = ponding_obj.change()
+    
+    return {"code": 0, "msg": "修改积水点信息成功"}
+    
 @ponding_api.delete("/ponding/<int:rid>")
 def del_ponding(rid):
     """删除

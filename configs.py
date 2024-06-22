@@ -35,11 +35,13 @@ class BaseConfig:
         "id",
         "date",
         "time",
+        "format_time",
         "city",
         "position",
         "longitude",
         "latitude",
         "depth_value",
+        "format_depth_value",
         "description",
     ]
 

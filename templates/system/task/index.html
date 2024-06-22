@@ -70,22 +70,39 @@
           </div>
         </div>
       </div>
+
+
       <div class="layui-form-item">
         <div class="layui-inline">
           <label class="layui-form-label">开始时间</label>
           <div class="layui-input-inline">
-            <input type="text" name="start_datetime" lay-verify="required" class="layui-input" id="task-form-start-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
+            <input type="text" name="start_datetime"  class="layui-input" id="task-form-start-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
           </div>
         </div>
-      </div>
-      <div class="layui-form-item">
         <div class="layui-inline">
           <label class="layui-form-label">结束时间</label>
           <div class="layui-input-inline">
-            <input type="text" name="end_datetime" lay-verify="required" class="layui-input" id="task-form-end-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
+            <input type="text" name="end_datetime" class="layui-input" id="task-form-end-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
           </div>
         </div>
       </div>
+
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">任务开始时间</label>
+          <div class="layui-input-inline">
+            <input type="text" name="task_start_datetime" lay-verify="required" class="layui-input" id="task-form-task-start-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
+          </div>
+        </div>
+        <div class="layui-inline">
+          <label class="layui-form-label">任务结束时间</label>
+          <div class="layui-input-inline">
+            <input type="text" name="task_end_datetime" lay-verify="required" class="layui-input" id="task-form-task-end-datetime" placeholder="yyyy-MM-dd HH:mm:ss" />
+          </div>
+        </div>
+      </div>
+
+
       <div class="layui-form-item layui-form-text">
         <label class="layui-form-label">备注</label>
         <div class="layui-input-block">
@@ -168,6 +185,8 @@
                 { field: 'interval', title: '时间间隔', minWidth: 140, expandedWidth: 140 },
                 { field: 'start_datetime', title: '开始时间', minWidth: 200, expandedWidth: 200, sort: true },
                 { field: 'end_datetime', title: '结束时间', minWidth: 200, expandedWidth: 200, sort: true },
+                { field: 'task_start_datetime', title: '任务开始时间', minWidth: 200, expandedWidth: 200, sort: true },
+                { field: 'task_end_datetime', title: '任务结束时间', minWidth: 200, expandedWidth: 200, sort: true },
                 {
                   title: '状态',
                   minWidth: 100,
@@ -247,6 +266,7 @@
             //cities.forEach(function (city) {
             //  obj.data[city] = 'on'
             //})
+            console.log(obj.data)
             form.val('task-form', obj.data) // 将数据填充到表格中
             layer.open({
               type: 1,
@@ -413,12 +433,26 @@
       
         laydate.render({
           elem: '#task-form-start-datetime',
-          type: 'datetime'
+          type: 'datetime',
+          fullPanel: true
         })
       
         laydate.render({
           elem: '#task-form-end-datetime',
-          type: 'datetime'
+          type: 'datetime',
+          fullPanel: true
+        })
+
+        laydate.render({
+          elem: '#task-form-task-start-datetime',
+          type: 'datetime',
+          fullPanel: true
+        })
+      
+        laydate.render({
+          elem: '#task-form-task-end-datetime',
+          type: 'datetime',
+          fullPanel: true
         })
       })
     </script>

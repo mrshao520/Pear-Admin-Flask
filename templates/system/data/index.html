@@ -69,7 +69,7 @@
         <div class="layui-inline">
           <label class="layui-form-label">请选择日期</label>
           <div class="layui-input-inline">
-            <input type="text" name="date" class="layui-input" id="ponding-form-date" placeholder="yyyy-MM-dd HH:mm:ss" />
+            <input type="text" name="date" class="layui-input" id="ponding-form-date" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss" />
           </div>
         </div>
       </div>
@@ -77,6 +77,14 @@
         <label class="layui-form-label">时间</label>
         <div class="layui-input-block">
           <input type="text" name="time" placeholder="请输入时间" autocomplete="off" class="layui-input" />
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">请设置格式化时间</label>
+          <div class="layui-input-inline">
+            <input type="text" name="format_time" class="layui-input" id="ponding-form-format-time" placeholder="yyyy-MM-dd" />
+          </div>
         </div>
       </div>
       <div class="layui-form-item">
@@ -107,6 +115,12 @@
         <label class="layui-form-label">深度值</label>
         <div class="layui-input-block">
           <input type="text" name="depth_value" placeholder="请输入深度值" autocomplete="off" class="layui-input" />
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">格式化深度值</label>
+        <div class="layui-input-block">
+          <input type="text" name="format_depth_value" placeholder="请输入格式化深度值" autocomplete="off" class="layui-input" />
         </div>
       </div>
       <div class="layui-form-item">
@@ -200,11 +214,13 @@
                 { field: 'id', title: 'ID', fixed: 'left', minWidth: 60, expandedWidth: 60, sort: true },
                 { field: 'date', title: '日期', minWidth: 180, expandedWidth: 180, sort: true },
                 { field: 'time', title: '时间', minWidth: 80, expandedWidth: 80 },
+                { field: 'format_time', title: '格式化时间', minWidth: 80, expandedWidth: 80 },
                 { field: 'city', title: '城市', minWidth: 80, expandedWidth: 80, sort: true },
                 { field: 'position', title: '地点', minWidth: 200, expandedWidth: 200, sort: true },
                 { field: 'longitude', title: '经度', minWidth: 140, expandedWidth: 140, sort: true },
                 { field: 'latitude', title: '纬度', minWidth: 140, expandedWidth: 140, sort: true },
                 { field: 'depth_value', title: '深度值', minWidth: 100, expandedWidth: 100 },
+                { field: 'format_depth_value', title: '格式化深度值', minWidth: 100, expandedWidth: 100 },
                 { field: 'description', title: '备注', minWidth: 180, expandedWidth: 180 },
                 {
                   fixed: 'right',
@@ -484,6 +500,11 @@
         laydate.render({
           elem: '#ponding-form-date',
           type: 'datetime'
+        })
+
+        laydate.render({
+          elem: '#ponding-form-format-time',
+          type: 'date'
         })
       
         laydate.render({

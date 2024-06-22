@@ -1,31 +1,47 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import subprocess
 import requests
 import csv
 import json
+import re
 
 from .get_location import get_location
 from configs import BaseConfig
 from pear_admin.extensions import db
 from pear_admin.orms import DataPondingORM, ChannelsORM
 from pear_admin.extensions import scheduler
+from format_time import format_datetime
 
 
 def task_function(
     channels: str, city: str, start_datetime: datetime, end_datetime: datetime
 ):
+    now = datetime.now()
+    print(f"{now}-{channels}-{city}-{start_datetime}-{end_datetime}")
+
+    # 如果不设置开始结束，则取当天凌晨和明天凌晨
+    if not start_datetime:
+        start_datetime = datetime(year=now.year, month=now.month, day=now.day)
+
+    if not end_datetime:
+        end_datetime = datetime(
+            year=now.year, month=now.month, day=now.day
+        ) + timedelta(days=1)
+
     print(f"{datetime.now()}-{channels}-{city}-{start_datetime}-{end_datetime}")
 
+    # 配置文件，保存的文件路径
     untreated_filename = BaseConfig.UNTREATED_FILENAME
     csv_filename = BaseConfig.CSV_FILENAME
     csv_headers = BaseConfig.CSV_HEADERS
 
+    # 获取检索通道配置
     with scheduler.app.app_context():
         channel_info = db.session.query(ChannelsORM).filter_by(channel=channels).first()
 
     if channel_info is None:
         return False
-
+    # 根据命令格式进行替换
     command = channel_info.command.split(" ")
     replace_words = ["city", "start_datetime", "end_datetime"]
     new_words = [
@@ -38,13 +54,15 @@ def task_function(
         for word in command
         if word != ""
     ]
-
     print(f"command list : {command_list}")
+    if len(command_list) == 0:
+        # 空命令
+        return
 
-    results = []
-    errors = []
+    # 开启子进程进行爬取
+    results = []  # 输出结果
+    errors = []  # 错误信息
     p = None
-
     try:
         p = subprocess.Popen(
             args=command_list[1:],
@@ -67,7 +85,7 @@ def task_function(
         print(f"errors  length : {len(errors)}")
     except Exception as e:
         print(f"Command '{command_list}' throw an exception: {e}")
-        channel_info.information = repr(e)
+        channel_info.information = f"Command '{command_list}' throw an exception: {e}"
     finally:
         if p:
             # 确保子进程资源被释放
@@ -76,20 +94,24 @@ def task_function(
             p.terminate()
 
     if len(results) == 0 and len(errors) > 0:
+        # 未爬取到信息，且报错，说明爬虫有问题
         channel_info.status = False
         channel_info.information = errors[-1]
     elif len(results) > 0 and len(errors) > 0:
+        # 爬取到信息，但是报错
         channel_info.information = errors[-1]
 
     if len(results) == 0:
+        # 未爬取到信息，返回
         with scheduler.app.app_context():
             channel_info.save()
         return True
 
+    # 记录爬取的总数
     channel_info.total_number += len(results)
 
     if not BaseConfig.OPEN_PONDING_SERVER:
-        # 关闭 gpu 处理任务
+        # 关闭 gpu 处理任务，将提取到的信息保存到文件中
         with open(untreated_filename, "a", newline="", encoding="utf-8") as file:
             file.write("\n".join(results))
         pass
@@ -99,16 +121,24 @@ def task_function(
         req_extract_url = BaseConfig.PONDING_EXTRACT
         req_headers = {"Content-type": "application/json;charset=UTF-8"}
         req_json_str = json.dumps({"city": city, "content": results})
-        extract_res = requests.post(
-            req_extract_url, json=req_json_str, headers=req_headers
-        )
-        extract_res_json = json.loads(extract_res.text)
+        try:
+            extract_res = requests.post(
+                req_extract_url, json=req_json_str, headers=req_headers
+            )
+            extract_res_json = json.loads(extract_res.text)
+        except Exception as e:
+            print(f"request to ponding_server get an error: {e}")
+            with scheduler.app.app_context():
+                channel_info.save()
+            return False
+
         if extract_res_json["status"] != "success":
             with scheduler.app.app_context():
                 channel_info.save()
             return False
         for info in extract_res_json["info"]:
             print(info)
+            # 获取经纬度
             lati_longi_tude = get_location(city=info["city"], address=info["position"])
             if not lati_longi_tude:
                 # 未获取经纬度
@@ -116,7 +146,13 @@ def task_function(
             longitude, latitude = lati_longi_tude.split(",", maxsplit=2)
             info["longitude"] = longitude
             info["latitude"] = latitude
+            # 转化时间
             info["date"] = datetime.strptime(info["date"], "%Y-%m-%d %H:%M:%S")
+            # 格式化积水深度值
+            info["format_depth_value"] = format_value(info["depth_value"])
+            # 格式化时间
+            info["format_time"] = format_datetime(info["date"], info["time"])
+            # 保存到数据库
             with scheduler.app.app_context():
                 ponding = DataPondingORM(**info)
                 result = ponding.save()
@@ -138,7 +174,7 @@ def task_function(
                 print("保存成功")
                 effective_number += 1
             else:
-                print("保存失败")
+                print("保存失败，重复数据")
                 # 保存失败
                 pass
 
@@ -146,3 +182,18 @@ def task_function(
         with scheduler.app.app_context():
             channel_info.save()
         return True
+
+
+def format_value(depth: str):
+    numbers = re.findall(r"\d+\.\d+|\d+", depth)
+    # print(numbers)
+    if not numbers:
+        return
+    number = int(numbers[0])  # 获取第一个数字
+    if "cm" in depth or "CM" in depth or "厘米" in depth or "公分" in depth:
+        return f"{number}cm"
+    if "mm" in depth or "MM" in depth or "毫米" in depth:
+        return f"{number // 100}cm"
+    elif "m" in depth or "M" in depth or "米" in depth:
+        return f"{number * 100}cm"
+    return

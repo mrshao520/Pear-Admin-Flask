@@ -10,12 +10,18 @@ class DataPondingORM(BaseORM):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment="自增id")
     date = db.Column(db.DateTime, nullable=False, comment="日期")
     time = db.Column(db.String(64), nullable=True, comment="时间")
+    format_time = db.Column(db.DateTime, nullable=True, comment="格式化时间")
     city = db.Column(db.String(64), nullable=False, comment="城市")
     position = db.Column(db.String(128), nullable=False, comment="地点")
     longitude = db.Column(db.String(64), nullable=False, comment="经度")
     latitude = db.Column(db.String(64), nullable=False, comment="纬度")
     depth_value = db.Column(db.String(64), nullable=True, comment="深度值")
+    format_depth_value = db.Column(db.String(64), nullable=True, comment="格式化深度值")
     description = db.Column(db.String(256), nullable=True, comment="备注")
+    
+    def change(self):
+        db.session.add(self)
+        db.session.commit()
 
     def save(self):
         existing = (
@@ -52,11 +58,17 @@ class DataPondingORM(BaseORM):
             "id": self.id,
             "date": self.date.strftime("%Y-%m-%d %H:%M:%S"),
             "time": self.time,
+            "format_time": (
+                self.format_time.strftime("%Y-%m-%d")
+                if self.format_time
+                else None
+            ),
             "city": self.city,
             "position": self.position,
             "longitude": self.longitude,
             "latitude": self.latitude,
             "depth_value": self.depth_value,
+            "format_depth_value": self.format_depth_value,
             "description": self.description,
         }
 
