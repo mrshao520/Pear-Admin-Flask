@@ -10,7 +10,7 @@ from configs import BaseConfig
 from pear_admin.extensions import db
 from pear_admin.orms import DataPondingORM, ChannelsORM
 from pear_admin.extensions import scheduler
-from format_time import format_datetime
+from .format_time import format_datetime
 
 
 def task_function(
