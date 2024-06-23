@@ -15,17 +15,16 @@ RUN pip --no-cache-dir install  -i ${PIPURL} --upgrade pip \
     && pip --no-cache-dir install  -i ${PIPURL} gunicorn
 
 COPY . /app/
-COPY dockerdata/start.sh /app/
-COPY dockerdata/gunicorn.conf.py /app/
+COPY ./dockerdata/start.sh /app/
+COPY ./dockerdata/gunicorn.conf.py /app/
 WORKDIR /app/
 
 ENV TIME_ZONE Asia/Shanghai
-ENV PIPURL "https://pypi.tuna.tsinghua.edu.cn/simple/ --trusted-host pypi.douban.com"
 
 RUN echo "${TIME_ZONE}" > /etc/timezone \
     && ln -sf /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime \
-    && chmod +x start.sh \
+    && chmod 777 start.sh \
     && sed -i  's/MYSQL_HOST = "127.0.0.1"/MYSQL_HOST = "mysql"/'  applications/config.py \
     && sed -i  's/REDIS_HOST = "127.0.0.1"/REDIS_HOST = "redis"/'  applications/config.py
 
-CMD ./start.sh
+CMD ["/bin/sh", "/app/start.sh"]

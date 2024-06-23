@@ -4,6 +4,9 @@ migrations/
 # sqlite
 *.db
 
+# 忽略 mysql 数据库
+dockerdata/mysql/data
+
 # 文件上传
 static/upload
 
