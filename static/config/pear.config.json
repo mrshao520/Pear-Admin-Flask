@@ -1,7 +1,7 @@
 {
   "logo": {
-    "title": "Admin Flask in json",
-    "image": "/static/admin/images/logo.png"
+    "title": "Ponding System",
+    "image": "/static/admin/images/ponding.png"
   },
   "menu": {
     "data": "/api/v1/menu",
