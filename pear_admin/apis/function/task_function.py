@@ -4,7 +4,7 @@ import requests
 import csv
 import json
 import re
-
+from loguru import logger
 from .get_location import get_location
 from configs import BaseConfig
 from pear_admin.extensions import db
@@ -14,11 +14,18 @@ from .format_time import format_datetime
 
 
 def task_function(
-    channels: str, city: str, start_datetime: datetime, end_datetime: datetime
+    id: str,
+    channels: str,
+    city: str,
+    interval: str,
+    start_datetime: datetime,
+    end_datetime: datetime,
+    task_start_datetime: datetime,
+    task_end_datetime: datetime,
 ):
     now = datetime.now()
-    print(f"{now}-{channels}-{city}-{start_datetime}-{end_datetime}")
-
+    logger.info(f"当前时间: {now} --- 任务id: {id}")
+    logger.info(f"任务开始结束时间: {task_start_datetime} --- {task_end_datetime}")
     # 如果不设置开始结束，则取当天凌晨和明天凌晨
     if not start_datetime:
         start_datetime = datetime(year=now.year, month=now.month, day=now.day)
@@ -28,7 +35,8 @@ def task_function(
             year=now.year, month=now.month, day=now.day
         ) + timedelta(days=1)
 
-    print(f"{datetime.now()}-{channels}-{city}-{start_datetime}-{end_datetime}")
+    logger.info(f"爬虫开始结束时间: {start_datetime} --- {end_datetime}")
+    logger.info(f"城市: {city} --- 渠道: {channels} --- 间隔时间: {interval}")
 
     # 配置文件，保存的文件路径
     untreated_filename = BaseConfig.UNTREATED_FILENAME
@@ -40,6 +48,7 @@ def task_function(
         channel_info = db.session.query(ChannelsORM).filter_by(channel=channels).first()
 
     if channel_info is None:
+        logger.info(f"未找到对应渠道: {channels}")
         return False
     # 根据命令格式进行替换
     command = channel_info.command.split(" ")
@@ -54,9 +63,11 @@ def task_function(
         for word in command
         if word != ""
     ]
-    print(f"command list : {command_list}")
+    logger.info(f"command list : {command_list}")
+
     if len(command_list) == 0:
         # 空命令
+        logger.info(f"空命令，返回!")
         return
 
     # 开启子进程进行爬取
@@ -73,18 +84,18 @@ def task_function(
         # 获取实时输出
         for line in iter(p.stdout.readline, b""):
             line_info = line.decode("utf-8").strip()
-            print("output:" + line_info)
+            logger.info("output:" + line_info)
             results.append(line_info)
         for line in iter(p.stderr.readline, b""):
             line_info = line.decode("utf-8").strip()
-            print("error:" + line_info)
+            logger.debug("error:" + line_info)
             errors.append(line_info)
         # 等待命令执行完成
         p.wait()
-        print(f"results length : {len(results)}")
-        print(f"errors  length : {len(errors)}")
+        logger.info(f"results length : {len(results)}")
+        logger.debug(f"errors  length : {len(errors)}")
     except Exception as e:
-        print(f"Command '{command_list}' throw an exception: {e}")
+        logger.info(f"Command '{command_list}' throw an exception: {e}")
         channel_info.information = f"Command '{command_list}' throw an exception: {e}"
     finally:
         if p:
@@ -103,15 +114,18 @@ def task_function(
 
     if len(results) == 0:
         # 未爬取到信息，返回
+        logger.info("未爬取到有用信息，返回!")
         with scheduler.app.app_context():
             channel_info.save()
         return True
 
     # 记录爬取的总数
     channel_info.total_number += len(results)
+    logger.info(f"渠道 {channels} 的爬取总数: {channel_info.total_number}")
 
     if not BaseConfig.OPEN_PONDING_SERVER:
         # 关闭 gpu 处理任务，将提取到的信息保存到文件中
+        logger.info(f"关闭 gpu 处理任务，将爬取到的信息保存到文件中")
         with open(untreated_filename, "a", newline="", encoding="utf-8") as file:
             file.write("\n".join(results))
         pass
@@ -133,19 +147,22 @@ def task_function(
             return False
 
         if extract_res_json["status"] != "success":
+            logger.debug(f"提取失败:{extract_res_json['info']}")
             with scheduler.app.app_context():
                 channel_info.save()
             return False
         for info in extract_res_json["info"]:
-            print(info)
+            logger.info(info)
             # 获取经纬度
             lati_longi_tude = get_location(city=info["city"], address=info["position"])
             if not lati_longi_tude:
                 # 未获取经纬度
+                logger.info(f"未获取经纬度!")
                 continue
             longitude, latitude = lati_longi_tude.split(",", maxsplit=2)
             info["longitude"] = longitude
             info["latitude"] = latitude
+            logger.info(f"经纬度: {longitude},{latitude}")
             # 转化时间
             info["date"] = datetime.strptime(info["date"], "%Y-%m-%d %H:%M:%S")
             # 格式化积水深度值
@@ -171,13 +188,16 @@ def task_function(
                     # 写入数据
                     writer.writerow(ponding_list)
 
-                print("保存成功")
+                # print("保存成功")
+                # logger.info("保存成功")
                 effective_number += 1
             else:
-                print("保存失败，重复数据")
+                # print("保存失败，重复数据")
+                logger.info("保存失败，重复数据")
                 # 保存失败
                 pass
-
+        channel_info.total_effective_number += effective_number
+        logger.info(f"爬取有效信息个数/总有效信息个数: {effective_number}/{channel_info.total_effective_number}")
         # 保存 渠道 信息
         with scheduler.app.app_context():
             channel_info.save()

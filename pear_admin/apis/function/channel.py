@@ -3,6 +3,8 @@ from flask_sqlalchemy.pagination import Pagination
 from pear_admin.extensions import db, scheduler
 from pear_admin.orms import ChannelsORM
 from datetime import datetime
+from loguru import logger
+
 
 channel_api = Blueprint("channel", __name__)
 
@@ -31,11 +33,11 @@ def create_channel():
     id = data["id"]
     if data["id"]:
         del data["id"]
-    
+
     # data["end_datetime"] = datetime.strptime(
     #     data.get("end_datetime"), "%Y-%m-%d %H:%M:%S"
     # )
-    
+    logger.info(f"{data}")
     # 保存任务
     channel = ChannelsORM(**data)
     # save之后才能产生主键id
@@ -57,6 +59,8 @@ def change_channel(uid):
     data = request.get_json()
     del data["id"]
 
+    logger.info(f"{uid}:{data}")
+
     channel_obj = ChannelsORM.query.get(uid)
     for key, value in data.items():
         setattr(channel_obj, key, value)
@@ -75,8 +79,8 @@ def del_channel(rid):
     Args:
         rid (_type_): id
     """
+    logger.info(f"delete the {rid}")
     channel_obj = ChannelsORM.query.get(rid)
     channel_obj.delete()
 
     return {"code": 0, "msg": f"删除行 [id:{rid}] 成功"}
-

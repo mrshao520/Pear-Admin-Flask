@@ -4,6 +4,7 @@ from pear_admin.extensions import db, scheduler
 from pear_admin.orms import TaskORM
 from datetime import datetime
 from .task_function import task_function
+from loguru import logger
 
 task_api = Blueprint("task", __name__)
 
@@ -32,7 +33,8 @@ def create_task():
     id = data["id"]
     if data["id"]:
         del data["id"]
-    print(data)
+
+    logger.info(data)
     # print(data)
     # {'id': None, 'date': '2024-06-18 14:49:56', 'time': '11', 'city': '11',
     # 'position': '11', 'lati_longi_tude': '11', 'depth_value': '1', 'description': '1'}
@@ -73,19 +75,24 @@ def create_task():
             trigger="interval",
             id=str(task.id),
             kwargs={
+                "id": str(task.id),
                 "channels": data["channels"],
                 "city": data["cities"],
+                "interval": data["interval"].strftime("%H:%M:%S"),
                 "start_datetime": data["start_datetime"],
                 "end_datetime": data["end_datetime"],
+                "task_start_datetime": data["task_start_datetime"],
+                "task_end_datetime": data["task_end_datetime"],
             },
             hours=data["interval"].hour,
             minutes=data["interval"].minute,
             seconds=data["interval"].second,
             start_date=data["task_start_datetime"],
             end_date=data["task_end_datetime"],
-            # replace_existing=True,
+            replace_existing=True,
         )
     except Exception as e:
+        logger.debug(f"get an exception: {e}")
         return {"code": -1, "msg": f"{e}"}, 401
 
     return {"code": 0, "msg": "新增任务成功"}
@@ -100,6 +107,8 @@ def change_task(uid):
     """
     data = request.get_json()
     del data["id"]
+
+    logger.info(f"{uid}:{data}")
 
     # cites = []
     # for k, v in data.items():
@@ -137,17 +146,20 @@ def change_task(uid):
             func=task_function,
             trigger="interval",
             kwargs={
+                "id": str(task_obj.id),
                 "channels": data["channels"],
                 "city": data["cities"],
+                "interval": data["interval"].strftime("%H:%M:%S"),
                 "start_datetime": data["start_datetime"],
                 "end_datetime": data["end_datetime"],
+                "task_start_datetime": data["task_start_datetime"],
+                "task_end_datetime": data["task_end_datetime"],
             },
             hours=data["interval"].hour,
             minutes=data["interval"].minute,
             seconds=data["interval"].second,
             start_date=data["task_start_datetime"],
             end_date=data["task_end_datetime"],
-            # replace_existing=True,
         )
 
     task_obj.save()
@@ -161,7 +173,7 @@ def del_task(rid):
     Args:
         rid (_type_): id
     """
-    # print(f'删除 ： {rid}')
+    logger.info(f"delete the {rid}")
     task_obj = TaskORM.query.get(rid)
     # 删除定时任务
     if scheduler.get_job(str(task_obj.id)):

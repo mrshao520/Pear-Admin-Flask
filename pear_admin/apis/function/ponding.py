@@ -3,7 +3,7 @@ from flask_sqlalchemy.pagination import Pagination
 from pear_admin.extensions import db
 from pear_admin.orms import DataPondingORM, DataSummaryORM
 from datetime import datetime
-from operator import or_, and_
+from loguru import logger
 
 ponding_api = Blueprint("ponding", __name__)
 
@@ -87,7 +87,8 @@ def create_ponding():
     data = request.get_json()
     if data["id"]:
         del data["id"]
-    print(data)
+
+    logger.info(data)
     # print(data)
     # {'id': None, 'date': '2024-06-18 14:49:56', 'time': '11', 'city': '11',
     # 'position': '11', 'lati_longi_tude': '11', 'depth_value': '1', 'description': '1'}
@@ -115,8 +116,9 @@ def change_ponding(uid):
     """
     data = request.get_json()
     del data["id"]
-    
+
     # print(data)
+    logger.info(f"{uid}:{data}")
 
     ponding_obj = DataPondingORM.query.get(uid)
     for key, value in data.items():
@@ -125,10 +127,12 @@ def change_ponding(uid):
         elif key == "format_time" and value:
             value = datetime.strptime(value, "%Y-%m-%d")
         setattr(ponding_obj, key, value)
-    result = ponding_obj.change()
-    
+
+    ponding_obj.change()
+
     return {"code": 0, "msg": "修改积水点信息成功"}
-    
+
+
 @ponding_api.delete("/ponding/<int:rid>")
 def del_ponding(rid):
     """删除
@@ -137,6 +141,7 @@ def del_ponding(rid):
         rid (_type_): id
     """
     # print(f'删除 ： {rid}')
+    logger.info(f"delete the {rid}")
     ponding_obj = DataPondingORM.query.get(rid)
     ponding_obj.delete()
     return {"code": 0, "msg": f"删除行 [id:{rid}] 成功"}

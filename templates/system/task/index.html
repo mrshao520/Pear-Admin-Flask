@@ -193,7 +193,7 @@
                   expandedWidth: 100,
                   sort: true,
                   templet: function (d) {
-                    var end = new Date(d.end_datetime.replace(/-/g, '/'))
+                    var end = new Date(d.task_end_datetime.replace(/-/g, '/'))
                     var now = new Date()
                     if (end > now) {
                       return '<button type="button" class="layui-btn layui-btn-sm layui-btn-radius">未过期</button>'

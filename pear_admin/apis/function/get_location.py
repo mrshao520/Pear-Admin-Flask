@@ -1,4 +1,5 @@
 import requests
+from configs import BaseConfig
 
 
 def get_location(city, address, output="JSON", sig=None, callback=None):
@@ -14,7 +15,7 @@ def get_location(city, address, output="JSON", sig=None, callback=None):
     """
     base_url = "https://restapi.amap.com/v3/geocode/geo"  # API的基础URL
     params = {
-        "key": "3f9d8dabae7db3acf1612c15a3b1e150",
+        "key": BaseConfig.GAODE_API,
         "address": address,
         "city": city,
         "output": output,
