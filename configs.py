@@ -42,8 +42,8 @@ class BaseConfig:
     # 高德API KEY设置
     GAODE_API = "3f9d8dabae7db3acf1612c15a3b1e150"
     # 保存文件设置
-    UNTREATED_FILENAME = "./instance/untreated.txt"
-    CSV_FILENAME = "./instance/data.csv"
+    UNTREATED_FILENAME = "./data/untreated.txt"
+    CSV_FILENAME = "./data/data.csv"
     CSV_HEADERS = [
         "id",
         "date",

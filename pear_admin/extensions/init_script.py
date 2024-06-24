@@ -45,6 +45,9 @@ def register_script(app: Flask):
     # 这个命令是 init，用于初始化数据库
     @app.cli.command()  # 装饰器，将 init 函数注册为 Flask CLI 命令
     def init():
+        """
+        将 csv 文件中的数据导入到数据库
+        """
         # 删除所有数据库
         db.drop_all()
         # 创建数据库

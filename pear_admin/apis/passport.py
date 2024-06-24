@@ -29,7 +29,11 @@ def login_in():
     if not user.check_password(data["password"]):
         return {"msg": "用户密码错误", "code": -1}, 401
 
+    # 访问令牌，用于验证用户的一次性请求
+    # 生成一个包含用户身份信息的JWT令牌。这个访问令牌会在用户登录后提供给客户端，用于在后续的请求中验证用户身份。
     access_token = create_access_token(user)
+    # 刷新令牌，用于请求新的访问令牌
+    # 生成一个用于刷新访问令牌的JWT令牌。当访问令牌过期时，用户可以使用刷新令牌来获取一个新的访问令牌。
     refresh_token = create_refresh_token(user)
 
     response = make_response(

@@ -141,7 +141,8 @@ def task_function(
             )
             extract_res_json = json.loads(extract_res.text)
         except Exception as e:
-            print(f"request to ponding_server get an error: {e}")
+            logger.info(f"request to ponding_server get an error: {e}")
+            channel_info.information = f"request to ponding_server get an error: {e}"
             with scheduler.app.app_context():
                 channel_info.save()
             return False
